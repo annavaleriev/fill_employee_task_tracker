@@ -42,8 +42,6 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework_simplejwt',
     'drf_spectacular',
-    'django_celery_results',
-    'django_celery_beat',
 ]
 
 REST_FRAMEWORK = {
@@ -169,33 +167,3 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
 }
 
-# URL-адрес брокера сообщений
-CELERY_BROKER_URL = "redis://redis:6379/0"
-
-
-# URL-адрес брокера результатов, также Redis
-CELERY_RESULT_BACKEND = "redis://redis:6379/0"
-
-
-# Часовой пояс для работы Celery
-CELERY_TIMEZONE = "Europe/Moscow"
-
-# Флаг отслеживания выполнения задач
-CELERY_TASK_TRACK_STARTED = True
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-CELERY_BROKER_CONNECTION_MAX_RETRIES = None
-
-# Указываем форматы для сериализации данных (опционально)
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-
-# Использовать Django Celery Beat Scheduler
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
-
-# Максимальное время на выполнение задачи
-CELERY_TASK_TIME_LIMIT = 30 * 60
-
-CELERY_IMPORTS = (
-    "habits.tasks",
-)
