@@ -9,13 +9,14 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-import os
 from datetime import timedelta
 from pathlib import Path
 
+
+import os
+
 from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,6 @@ DEBUG = os.getenv("DEBUG") == "True"
 ALLOWED_HOSTS = ["*"]
 
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -91,10 +91,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -103,11 +99,10 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "PORT": os.getenv("DATABASE_PORT"),
         "HOST": "db",
+        # "HOST": "localhost",
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -125,9 +120,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = "ru-ru"
 
 TIME_ZONE = 'UTC'
@@ -137,13 +129,8 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -158,7 +145,7 @@ CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1"]
 CORS_ALLOW_ALL_ORIGINS = False
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Anna API habits",  # название проекта
+    "TITLE": "Anna API employee_task_tracker",  # название проекта
     "VERSION": "0.0.1",  # версия проекта
     "SERVE_INCLUDE_SCHEMA": True,  # исключить эндпоинт /schema
     "SWAGGER_UI_SETTINGS": {
@@ -166,4 +153,3 @@ SPECTACULAR_SETTINGS = {
     },
     "COMPONENT_SPLIT_REQUEST": True,
 }
-
