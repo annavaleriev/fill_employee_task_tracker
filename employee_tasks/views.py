@@ -1,40 +1,33 @@
-from django.db.models import Count, Q
-from rest_framework import viewsets, status
+from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, generics
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
+from employee_tasks.filters import EmployeeTaskFilter
 from employee_tasks.models import Employee, Task
 from employee_tasks.paginators import EmployeeTaskPaginator
-from employee_tasks.serializer import EmployeeSerializer, TaskSerializer
+from employee_tasks.serializer import EmployeeSerializer, TaskSerializer, EmployeeCreateSerializer, \
+    BusyEmployeeSerializer
 
 
-class EmployeeViewSet(viewsets.ModelViewSet):
+class EmployeeViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet для сотрудников"""
     serializer_class = EmployeeSerializer
     pagination_class = EmployeeTaskPaginator
-    queryset = Employee.objects.all()
+    queryset = Employee.objects.employees_with_count_tasks()
     permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "delete", "put"]
-
-    def get_queryset(self):
-        """Получаем список сотрудников с количеством активных задач"""
-        queryset = super().get_queryset()
-        return queryset.annotate(
-            active_tasks_count=Count(
-                "tasks", filter=Q(tasks__status="in_progress"))
-        ).order_by("-active_tasks_count")
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = EmployeeTaskFilter
 
     @action(
         detail=False,
-        methods=["get"],
-        url_path="workload",
+        serializer_class=BusyEmployeeSerializer,
+        queryset=Employee.objects.employees_with_count_tasks().order_by("-active_tasks_count")
     )
-    def workload(self, request):
+    def busy(self, request):
         """Получаем список сотрудников с количеством активных задач"""
-        queryset = Employee.objects.all()
-        serializer = EmployeeSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return super().list(request)
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -43,56 +36,75 @@ class TaskViewSet(viewsets.ModelViewSet):
     pagination_class = EmployeeTaskPaginator
     queryset = Task.objects.all()
     permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "delete", "put"]
+    http_method_names = ["get", "post", "delete", "patch"]
 
     @action(
         detail=False,
-        methods=["get"],
-        url_path="not-worked-tasks"
+        queryset=Task.objects.filter(
+            Q(status="pending")
+            &
+            Q(parent_task__isnull=False)
+            &
+            Q(parent_task__status="in_progress")
+        ).all(),
+        serializer_class=TaskSerializer
     )
-    def not_worked_tasks(self, request):
+    def important(self, request):
         """Получаем важные задачи, которые не взяты в работу"""
-        try:
-            important_tasks = self.get_queryset().filter(
-                Q(status="pending") & Q(parent_task_isnull=False)
-            ).distinct()
+        return super().list(request)
 
-            serializer = TaskSerializer(important_tasks, many=True)
-            return Response(serializer.data)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    # @action(
+    #     detail=True,
+    #     methods=["get"],
+    #     url_path="get-employees-for-task"
+    # )
+    # def get_employees_for_tasks(self, request, pk=None):
+    #     """Получаем список сотрудников, которые могут взять важную задачу"""
+    #     try:
+    #         task = self.get_queryset().get(pk=pk)
+    #         if task.status != "pending":
+    #             return Response({"message": "Задача уже взята в работу"}, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #         busy_employees = Employee.objects.annotate(
+    #             active_tasks_count=Count(
+    #                 "tasks", filter=Q(tasks__status="in_progress"))
+    #         ).order_by("active_tasks_count")
+    #
+    #         list_busy_employees = busy_employees.first()
+    #
+    #         if list_busy_employees is None:
+    #             return Response({"message": "Нет сотрудников"}, status=status.HTTP_404_NOT_FOUND)
+    #
+    #         free_employees_for_tasks = busy_employees.filter(
+    #             Q(active_tasks_count__lte=list_busy_employees.active_tasks_count + 2) |
+    #             Q(tasks__parent_task=task.parent_task)
+    #         ).distinct()
+    #
+    #
+    #         employee_data = EmployeeSerializer(free_employees_for_tasks, many=True).data
+    #
+    #         response_data = {
+    #             "importance": "Важная",
+    #             "deadline": task.deadline,
+    #             "employees": employee_data,
+    #         }
+    #
+    #         return Response(response_data)
+    #
+    #     except Task.DoesNotExist:
+    #         return Response({"message": "Задача не найдена"}, status=status.HTTP_404_NOT_FOUND)
+    #     except Exception as e:
+    #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_employees_for_task(self, request, pk=None):
-        """Получаем список сотрудников, которые могут взять важную задачу"""
-        try:
-            task = self.get_queryset().get(pk=pk)
-            if task.status != "pending":
-                return Response({"detail": "Задача уже взята в работу"}, status=status.HTTP_400_BAD_REQUEST)
 
-            busy_employees = Employee.objects.annotate(
-                active_tasks_count=Count(
-                    "task", filter=Q(tasks__status="in_progress"))
-            ).order_by("active_tasks_count")
+class EmployeeCreateView(generics.CreateAPIView):  # Создаем View для создания пользователя
+    queryset = Employee.objects.all()  # Получаем всех пользователей
+    serializer_class = EmployeeCreateSerializer  # Используем сериализатор
+    permission_classes = (
+        AllowAny,
+    )  # Устанавливаем права доступа для всех пользователей
 
-            list_busy_employees = busy_employees.first()
-
-            free_employees_for_tasks = busy_employees.filter(
-                Q(active_tasks_count_lte=list_busy_employees.active_tasks_count + 2) |
-                Q(task__parent_task=task.parent_task)
-            ).distinct()
-
-
-            employee_data = EmployeeSerializer(free_employees_for_tasks, many=True).data
-
-            response_data = {
-                "importNCE": "Важная",
-                "deadline": task.deadline,
-                "employee": employee_data,
-            }
-
-            return Response(response_data)
-
-        except Task.DoesNotExist:
-            return Response({"detail": "Задача не найдена"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        user = serializer.save(is_active=True)  # Создаем пользователя
+        user.set_password(user.password)  # Хешируем пароль
+        user.save()
