@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 
 from django.db import models
+from django.db.models import Count, Q
 
 NULLABLE = {"blank": True, "null": True}
 
@@ -62,6 +63,13 @@ class UserManager(BaseUserManager):
             email, password, **extra_fields
         )  # Создаем пользователя
 
+    def employees_with_count_tasks(self):
+        return self.annotate(
+            active_tasks_count=Count(
+                "task", filter=Q(task__status="in_progress")
+            )
+        )
+
 
 class Employee(AbstractUser):
     """Класс для создания пользователей"""
@@ -78,24 +86,18 @@ class Employee(AbstractUser):
         max_length=150,
         verbose_name="Имя",
         help_text="Введите имя",
-        blank=False,
-        null=False,
     )
 
     last_name = models.CharField(
         max_length=150,
         verbose_name="Фамилия",
         help_text="Введите фамилию",
-        blank=False,
-        null=False,
     )
 
     position = models.CharField(
         max_length=150,
         verbose_name="Должность",
         help_text="Введите должность",
-        blank=False,
-        null=False,
     )
 
     USERNAME_FIELD = "email" # Поле для входа
@@ -132,7 +134,7 @@ class Task(models.Model):
         Employee,
         on_delete=models.SET_NULL,
         verbose_name="Сотрудник",
-        help_text="Выберите сотрудника отвественного за задачу",
+        help_text="Выберите сотрудника ответственного за задачу",
         null=True
     )
 
@@ -152,8 +154,7 @@ class Task(models.Model):
     deadline = models.DateTimeField(
         verbose_name="Срок выполнения задачи",
         help_text="Введите срок выполнения задачи",
-        blank=True,
-        null=True,
+        **NULLABLE
     )
 
     status = models.CharField(
