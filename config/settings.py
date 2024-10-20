@@ -99,7 +99,6 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "PORT": os.getenv("DATABASE_PORT"),
         "HOST": "db",
-        # "HOST": "localhost",
     }
 }
 
