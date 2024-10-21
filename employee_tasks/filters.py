@@ -30,5 +30,3 @@ class EmployeeTaskFilter(django_filters.FilterSet):
             return parent_tasks_empl or empl_with_small_count_tasks
 
         return queryset
-
-

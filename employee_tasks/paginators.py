@@ -1,5 +1,6 @@
 from rest_framework.pagination import PageNumberPagination
 
+
 class EmployeeTaskPaginator(PageNumberPagination):
     """Класс пагинации для сотрудников и задач"""
 

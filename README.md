@@ -62,5 +62,3 @@
    docker-compose up --build
    ```
 4. Перейдите в браузер по адресу http://localhost:8000.
-
-
