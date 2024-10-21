@@ -97,14 +97,14 @@ class TaskViewSet(viewsets.ModelViewSet):
     #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class EmployeeCreateView(generics.CreateAPIView):  # Создаем View для создания пользователя
-    queryset = Employee.objects.all()  # Получаем всех пользователей
-    serializer_class = EmployeeCreateSerializer  # Используем сериализатор
+class EmployeeCreateView(generics.CreateAPIView):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeCreateSerializer
     permission_classes = (
         AllowAny,
-    )  # Устанавливаем права доступа для всех пользователей
+    )
 
     def perform_create(self, serializer):
-        user = serializer.save(is_active=True)  # Создаем пользователя
-        user.set_password(user.password)  # Хешируем пароль
+        user = serializer.save(is_active=True)
+        user.set_password(user.password)
         user.save()

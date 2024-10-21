@@ -100,10 +100,9 @@ class Employee(AbstractUser):
         help_text="Введите должность",
     )
 
-    USERNAME_FIELD = "email" # Поле для входа
-    REQUIRED_FIELDS = [] # Обязательные поля
-
-    objects = UserManager()  # Объект для работы с пользователями
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+    objects = UserManager()
 
     class Meta:
         verbose_name = "Сотрудник"
