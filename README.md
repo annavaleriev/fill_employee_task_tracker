@@ -61,7 +61,8 @@
 
 1. Склонируйте репозиторий:
    ```bash
-   git clone https://github.com/ваш-репозиторий.git
+   git clone https://github.com/annavaleriev/fill_employee_task_tracker.git
+
    cd ваш-репозиторий
    
 2. Создайте файл .env на основе .env_example и заполните
