@@ -1,4 +1,11 @@
-# TB5 Backend
+![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/-Django-092E20?logo=django&logoColor=white)
+![DRF](https://img.shields.io/badge/-DRF-ff1709?logo=django&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-336791?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/-Docker-2496ED?logo=docker&logoColor=white)
+![Pytest](https://img.shields.io/badge/-Pytest-0A9EDC?logo=pytest&logoColor=white)
+![Django ORM](https://img.shields.io/badge/-Django%20ORM-092E20?logo=django&logoColor=white)
+
 ## Трекер задач сотрудников
 
 ### Описание проекта
@@ -35,13 +42,15 @@
     Возвращаемый список объектов представлен в формате: `{Важная задача, Срок, [ФИО сотрудника]}`.
 
 ### Технические требования
-- **Язык программирования:** Проект реализован на Python 3.11.
-- **Фреймворк:** Используется Django для создания REST API с помощью Django REST Framework (DRF).
-- **База данных:** Хранение данных осуществляется в PostgreSQL.
-- **ORM:** Взаимодействие с базой данных реализовано через Django ORM.
-- **Контейнеризация:** Для контейнеризации приложения используется Docker.
-- **Валидация данных:** Реализована валидация входящих запросов.
-- **Покрытие тестами:** Написаны тесты для проверки работоспособности API.
+
+- **Язык программирования:** ![Python](https://img.shields.io/badge/Python-3.11-blue)
+- **Фреймворк:** ![Django](https://img.shields.io/badge/Django-4.0-green) ![DRF](https://img.shields.io/badge/DRF-3.14-red)
+- **База данных:** ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13-blue)
+- **ORM:** ![Django ORM](https://img.shields.io/badge/Django%20ORM-ORM-lightblue)
+- **Контейнеризация:** ![Docker](https://img.shields.io/badge/Docker-20.10-blue)
+- **Валидация данных:** ![Validation](https://img.shields.io/badge/Data%20Validation-Enabled-brightgreen)
+- **Покрытие тестами:** ![Tests](https://img.shields.io/badge/Tests-Pytest%20%26%20Django-orange)
+
 
 ## Документация
 
@@ -59,6 +68,6 @@
 
 3. Запустите проект с помощью Docker Compose:
    ```bash
-   docker-compose up --build
+   docker-compose up -d --build
    ```
-4. Перейдите в браузер по адресу http://localhost:8000.
+4. Перейдите в браузер по адресу http://127.0.0.1:8000
