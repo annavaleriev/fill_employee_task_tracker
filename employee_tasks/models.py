@@ -1,6 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
-
 from django.db import models
 from django.db.models import Count, Q
 
@@ -10,64 +9,36 @@ NULLABLE = {"blank": True, "null": True}
 class UserManager(BaseUserManager):
     """Класс для создания пользователей"""
 
-    use_in_migrations = True  # Переменная для использования в миграциях
+    use_in_migrations = True
 
-    def _create_user(
-            self, email, password, **extra_fields
-    ):  # Метод для создания пользователя
-        if not email:  # Если email не указан
-            raise ValueError(
-                "У пользователя должен быть адрес электронной почты"
-            )  # Выводим ошибку
-        email = self.normalize_email(email)  # Нормализуем email
-        user = self.model(email=email, **extra_fields)  # Создаем пользователя
-        user.set_password(password)  # Хешируем пароль
-        user.save(using=self._db)  # Сохраняем пользователя
-        return user  # Возвращаем пользователя
+    def _create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError("У пользователя должен быть адрес электронной почты")
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
-    def create_user(
-            self, email, password=None, **extra_fields
-    ):  # Метод для создания пользователя
-        extra_fields.setdefault(
-            "is_staff", False
-        )  # Устанавливаем значение по умолчанию
-        extra_fields.setdefault(
-            "is_superuser", False
-        )  # Устанавливаем значение по умолчанию
-        return self._create_user(
-            email, password, **extra_fields
-        )  # Создаем пользователя
+    def create_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", False)
+        extra_fields.setdefault("is_superuser", False)
+        return self._create_user(email, password, **extra_fields)
 
-    def create_superuser(
-            self, email, password=None, **extra_fields
-    ):  # Метод для создания суперпользователя
-        extra_fields.setdefault("is_staff", True)  # Устанавливаем значение по умолчанию
-        extra_fields.setdefault(
-            "is_superuser", True
-        )  # Устанавливаем значение по умолчанию
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
 
-        if (
-                extra_fields.get("is_staff") is not True
-        ):  # Если пользователь не является сотрудником
-            raise ValueError(
-                "Суперпользователь должен иметь is_staff=True"
-            )  # Выводим ошибку
-        if (
-                extra_fields.get("is_superuser") is not True
-        ):  # Если пользователь не является суперпользователем
-            raise ValueError(
-                "Суперпользователь должен иметь is_superuser=True."
-            )  # Выводим ошибку
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Суперпользователь должен иметь is_staff=True")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Суперпользователь должен иметь is_superuser=True.")
 
-        return self._create_user(
-            email, password, **extra_fields
-        )  # Создаем пользователя
+        return self._create_user(email, password, **extra_fields)
 
     def employees_with_count_tasks(self):
-        return self.annotate(
-            active_tasks_count=Count(
-                "task", filter=Q(task__status="in_progress")
-            )
+        return self.annotate(active_tasks_count=Count("task", filter=Q(task__status="in_progress"))).order_by(
+            "last_name"
         )
 
 
@@ -76,10 +47,7 @@ class Employee(AbstractUser):
 
     username = None
     email = models.EmailField(
-        unique=True,
-        verbose_name="Почта",
-        help_text="Введите адрес электронной почты",
-        **NULLABLE
+        unique=True, verbose_name="Почта", help_text="Введите адрес электронной почты", **NULLABLE
     )
 
     first_name = models.CharField(
@@ -134,7 +102,7 @@ class Task(models.Model):
         on_delete=models.SET_NULL,
         verbose_name="Сотрудник",
         help_text="Выберите сотрудника ответственного за задачу",
-        null=True
+        null=True,
     )
 
     parent_task = models.ForeignKey(
@@ -151,9 +119,7 @@ class Task(models.Model):
     )
 
     deadline = models.DateTimeField(
-        verbose_name="Срок выполнения задачи",
-        help_text="Введите срок выполнения задачи",
-        **NULLABLE
+        verbose_name="Срок выполнения задачи", help_text="Введите срок выполнения задачи", **NULLABLE
     )
 
     status = models.CharField(
